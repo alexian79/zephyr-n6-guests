@@ -1,0 +1,42 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Motor co-sim on the QEMU stm32n6570-dk:
+ *   TIM2 CH2 -> motor PWM drive, TIM3 CH1/CH2 -> tach A/B capture,
+ *   GPIOD 0/1 -> DIR/EN, ADC1 channel 0 -> motor current sense.
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+/* raw-register TIM3 capture: enable the node so its kernel clock is on */
+&timers3 {
+	status = "okay";
+	st,prescaler = <0>;
+};
+
+&timers2 {
+	status = "okay";
+	st,prescaler = <0>;
+	pwm2: pwm {
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&tim2_ch2_pa1>;
+	};
+};
+
+&adc1 {
+	status = "okay";
+};
+
+/ {
+	motor_pins {
+		compatible = "gpio-leds";
+
+		motor_dir: dir {
+			gpios = <&gpiod 0 GPIO_ACTIVE_HIGH>;
+		};
+
+		motor_en: en {
+			gpios = <&gpiod 1 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};

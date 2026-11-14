@@ -1,0 +1,69 @@
+/* SPDX-License-Identifier: Apache-2.0
+ *
+ * Sheet-transport controller on the QEMU stm32n6570-dk:
+ *   TIM2 CH1 -> M1 domain PWM, TIM5 CH1 -> M2 domain PWM,
+ *   GPIOD 0..3 -> DIR1/DIR2/EN1/EN2 outputs,
+ *   GPIOD 4..7 -> IN/S1/S2 (active high) + EXIT (active low) sensors.
+ * QEMU wires the timer's "ch" GPIO output waveform (generated in the
+ * timer model from PSC/ARR/CCR) into the transport device's pwm input;
+ * the PA0 pin conflicts between the two CH1 pinctrl entries are
+ * irrelevant because nothing routes these pads to the device.
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+&timers2 {
+	status = "okay";
+	st,prescaler = <0>;
+	pwm2: pwm {
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&tim2_ch1_pa0>;
+	};
+};
+
+&timers5 {
+	status = "okay";
+	st,prescaler = <0>;
+	pwm5: pwm {
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&tim5_ch1_pa0>;
+	};
+};
+
+/ {
+	transport_pins {
+		compatible = "gpio-leds";
+
+		dir1: dir1 {
+			gpios = <&gpiod 0 GPIO_ACTIVE_HIGH>;
+		};
+		dir2: dir2 {
+			gpios = <&gpiod 1 GPIO_ACTIVE_HIGH>;
+		};
+		en1: en1 {
+			gpios = <&gpiod 2 GPIO_ACTIVE_HIGH>;
+		};
+		en2: en2 {
+			gpios = <&gpiod 3 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	transport_sensors {
+		compatible = "gpio-keys";
+
+		sen_in: sen-in {
+			gpios = <&gpiod 4 GPIO_ACTIVE_HIGH>;
+		};
+		sen_s1: sen-s1 {
+			gpios = <&gpiod 5 GPIO_ACTIVE_HIGH>;
+		};
+		sen_s2: sen-s2 {
+			gpios = <&gpiod 6 GPIO_ACTIVE_HIGH>;
+		};
+		sen_exit: sen-exit {
+			gpios = <&gpiod 7 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
